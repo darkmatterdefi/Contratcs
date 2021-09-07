@@ -131,7 +131,8 @@ contract MasterChef_DarkMatter_KDM is Ownable, ReentrancyGuard {
 
     // Add a new lp to the pool. Can only be called by the owner.
     function add(uint256 _allocPoint, IERC20 _lpToken, uint16 _depositFeeBP, bool _withUpdate) public onlyOwner nonDuplicated(_lpToken) {
-        require(_depositFeeBP <= 10000, "add: invalid deposit fee basis points");
+        // deposit fee can't excess more than 10%
+        require(_depositFeeBP <= 1000, "add: invalid deposit fee basis points");
         if (_withUpdate) {
             massUpdatePools();
         }
@@ -150,8 +151,7 @@ contract MasterChef_DarkMatter_KDM is Ownable, ReentrancyGuard {
 
     // Update the given pool's KDM allocation point and deposit fee. Can only be called by the owner.
     function set(uint256 _pid, uint256 _allocPoint, uint16 _depositFeeBP, bool _withUpdate) public onlyOwner {
-        // deposit fee can't excess more than 10%
-        require(_depositFeeBP <= 1000, "set: invalid deposit fee basis points");
+        require(_depositFeeBP <= 10000, "set: invalid deposit fee basis points");
         if (_withUpdate) {
             massUpdatePools();
         }
