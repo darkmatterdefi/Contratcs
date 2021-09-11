@@ -1,4 +1,7 @@
-pragma solidity ^0.6.12;
+// SPDX-License-Identifier: MIT
+
+pragma solidity ^0.6.2;
+
 /**
  * @dev Collection of functions related to the address type
  */
@@ -63,9 +66,6 @@ library Address {
      * If `target` reverts with a revert reason, it is bubbled up by this
      * function (like regular Solidity function calls).
      *
-     * Returns the raw returned data. To convert to the expected return value,
-     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].
-     *
      * Requirements:
      *
      * - `target` must be a contract.
@@ -88,13 +88,18 @@ library Address {
     }
 
     /**
-     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
-     * but also transferring `value` wei to `target`.
+     * @dev Performs a Solidity function call using a low level `call`,
+     * transferring `value` wei. A plain`call` is an unsafe replacement for a
+     * function call: use this function instead.
+     *
+     * If `target` reverts with a revert reason, it is bubbled up by this
+     * function (like regular Solidity function calls).
      *
      * Requirements:
      *
+     * - `target` must be a contract.
      * - the calling contract must have an ETH balance of at least `value`.
-     * - the called Solidity function must be `payable`.
+     * - calling `target` with `data` must not revert.
      *
      * _Available since v3.1._
      */
