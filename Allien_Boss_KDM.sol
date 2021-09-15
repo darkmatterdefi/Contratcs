@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
- 
+ pragma solidity ^0.6.12; 
  import "@openzeppelin/contracts/GSN/Context.sol"; 
  import "@openzeppelin/contracts/access/Ownable.sol";
  import "@openzeppelin/contracts/math/SafeMath.sol"; 
@@ -11,7 +11,7 @@
  
 // File: contracts/libs/IMasterChef_DarkMatter_KDM.sol
 
-pragma solidity 0.6.12;
+pragma solidity ^0.6.12;
 
 interface IMasterChef_DarkMatter_KDM {
     function deposit(uint256 _pid, uint256 _amount) external;
@@ -23,9 +23,9 @@ interface IMasterChef_DarkMatter_KDM {
     function emergencyWithdraw(uint256 _pid) external;
 
 } 
-// File: contracts/Auto_KDM.sol
+// File: contracts/KDMVault.sol
 
-pragma solidity 0.6.12;
+pragma solidity ^0.6.12;
 
 contract KDMVault is Ownable, Pausable {
     using SafeERC20 for IERC20;
@@ -367,5 +367,96 @@ contract KDMVault is Ownable, Pausable {
             size := extcodesize(addr)
         }
         return size > 0;
+    }
+}
+
+
+pragma solidity 0.6.12;
+
+contract Allien_Boss_KDM is Ownable {
+    using SafeERC20 for IERC20;
+
+    KDMVault public immutable kdmVault;
+
+    /**
+     * @notice Constructor
+     * @param _kdmVaultAddress: KDMVault contract address
+     */
+    constructor(address _kdmVaultAddress) public {
+        kdmVault = KDMVault(_kdmVaultAddress);
+    }
+
+    /**
+     * @notice Sets admin address to this address
+     * @dev Only callable by the contract owner.
+     * It makes the admin == owner.
+     */
+    function setAdmin() external onlyOwner {
+        kdmVault.setAdmin(address(this));
+    }
+
+    /**
+     * @notice Sets treasury address
+     * @dev Only callable by the contract owner.
+     */
+    function setTreasury(address _treasury) external onlyOwner {
+        kdmVault.setTreasury(_treasury);
+    }
+
+    /**
+     * @notice Sets performance fee
+     * @dev Only callable by the contract owner.
+     */
+    function setPerformanceFee(uint256 _performanceFee) external onlyOwner {
+        kdmVault.setPerformanceFee(_performanceFee);
+    }
+
+    /**
+     * @notice Sets call fee
+     * @dev Only callable by the contract owner.
+     */
+    function setCallFee(uint256 _callFee) external onlyOwner {
+        kdmVault.setCallFee(_callFee);
+    }
+
+    /**
+     * @notice Sets withdraw fee
+     * @dev Only callable by the contract owner.
+     */
+    function setWithdrawFee(uint256 _withdrawFee) external onlyOwner {
+        kdmVault.setWithdrawFee(_withdrawFee);
+    }
+
+    /**
+     * @notice Sets withdraw fee period
+     * @dev Only callable by the contract owner.
+     */
+    function setWithdrawFeePeriod(uint256 _withdrawFeePeriod) external onlyOwner {
+        kdmVault.setWithdrawFeePeriod(_withdrawFeePeriod);
+    }
+
+    /**
+     * @notice Withdraw unexpected tokens sent to the KDM Vault
+     */
+    function inCaseTokensGetStuck(address _token) external onlyOwner {
+        kdmVault.inCaseTokensGetStuck(_token);
+        uint256 amount = IERC20(_token).balanceOf(address(this));
+        IERC20(_token).safeTransfer(msg.sender, amount);
+    }
+
+    /**
+     * @notice Triggers stopped state
+     * @dev Only possible when contract not paused.
+     */
+    function pause() external onlyOwner {
+        kdmVault.pause();
+    }
+
+    /**
+     * @notice Returns to normal state
+     * @dev Only possible when contract is paused.
+     */
+    function unpause() external onlyOwner {
+        kdmVault.unpause();
     }
 }
