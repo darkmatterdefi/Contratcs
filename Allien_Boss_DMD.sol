@@ -9,39 +9,39 @@
  import "@openzeppelin/contracts/utils/Pausable.sol"; 
  
  
-// File: contracts/libs/IMasterChef_DarkMatter_KDM.sol
+// File: contracts/libs/IMasterChef_DarkMatter_DMD.sol
 
 pragma solidity ^0.6.12;
 
-interface IMasterChef_DarkMatter_KDM {
+interface IMasterChef_DarkMatter_DMD {
     function deposit(uint256 _pid, uint256 _amount) external;
     function withdraw(uint256 _pid, uint256 _amount) external;
     function enterStaking(uint256 _amount) external;
     function leaveStaking(uint256 _amount) external;
-    function pendingKDM(uint256 _pid, address _user) external view returns (uint256);
+    function pendingDMD(uint256 _pid, address _user) external view returns (uint256);
     function userInfo(uint256 _pid, address _user) external view returns (uint256, uint256);
     function emergencyWithdraw(uint256 _pid) external;
 
 } 
-// File: contracts/KDMVault.sol
+// File: contracts/DMDVault.sol
 
 pragma solidity ^0.6.12;
 
-contract KDMVault is Ownable, Pausable {
+contract DMDVault is Ownable, Pausable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
     struct UserInfo {
         uint256 shares; // number of shares for a user
         uint256 lastDepositedTime; // keeps track of deposited time for potential penalty
-        uint256 KDMAtLastUserAction; // keeps track of kdm deposited at the last user action
+        uint256 DMDAtLastUserAction; // keeps track of DMD deposited at the last user action
         uint256 lastUserActionTime; // keeps track of the last user action time
     }
 
-    IERC20 public immutable token; // KDM token
+    IERC20 public immutable token; // DMD token
  
 
-   IMasterChef_DarkMatter_KDM public immutable masterchef;
+   IMasterChef_DarkMatter_DMD public immutable masterchef;
 
     mapping(address => UserInfo) public userInfo;
 
@@ -68,14 +68,14 @@ contract KDMVault is Ownable, Pausable {
 
     /**
      * @notice Constructor
-     * @param _token: KDM token contract
+     * @param _token: DMD token contract
      * @param _masterchef: MasterChef contract
      * @param _admin: address of the admin
      * @param _treasury: address of the treasury (collects fees)
      */
     constructor(
         IERC20 _token,
-        IMasterChef_DarkMatter_KDM _masterchef,
+        IMasterChef_DarkMatter_DMD _masterchef,
         address _admin,
         address _treasury
     ) public {
@@ -106,9 +106,9 @@ contract KDMVault is Ownable, Pausable {
     }
 
     /**
-     * @notice Deposits funds into the KDM Vault
+     * @notice Deposits funds into the DMD Vault
      * @dev Only possible when contract not paused.
-     * @param _amount: number of tokens to deposit (in KDM)
+     * @param _amount: number of tokens to deposit (in DMD)
      */
     function deposit(uint256 _amount) external whenNotPaused notContract {
         require(_amount > 0, "Nothing to deposit");
@@ -128,7 +128,7 @@ contract KDMVault is Ownable, Pausable {
 
         totalShares = totalShares.add(currentShares);
 
-        user.KDMAtLastUserAction = user.shares.mul(balanceOf()).div(totalShares);
+        user.DMDAtLastUserAction = user.shares.mul(balanceOf()).div(totalShares);
         user.lastUserActionTime = block.timestamp;
 
         _earn();
@@ -144,11 +144,11 @@ contract KDMVault is Ownable, Pausable {
     }
 
     /**
-     * @notice Reinvests KDM tokens into MasterChef
+     * @notice Reinvests DMD tokens into MasterChef
      * @dev Only possible when contract not paused.
      */
     function harvest() external notContract whenNotPaused {
-        IMasterChef_DarkMatter_KDM(masterchef).leaveStaking(0);
+        IMasterChef_DarkMatter_DMD(masterchef).leaveStaking(0);
 
         uint256 bal = available();
         uint256 currentPerformanceFee = bal.mul(performanceFee).div(10000);
@@ -226,11 +226,11 @@ contract KDMVault is Ownable, Pausable {
      * @dev EMERGENCY ONLY. Only callable by the contract admin.
      */
     function emergencyWithdraw() external onlyAdmin {
-        IMasterChef_DarkMatter_KDM(masterchef).emergencyWithdraw(0);
+        IMasterChef_DarkMatter_DMD(masterchef).emergencyWithdraw(0);
     }
 
     /**
-     * @notice Withdraw unexpected tokens sent to the KDM Vault
+     * @notice Withdraw unexpected tokens sent to the DMD Vault
      */
     function inCaseTokensGetStuck(address _token) external onlyAdmin {
         require(_token != address(token), "Token cannot be same as deposit token");
@@ -259,10 +259,10 @@ contract KDMVault is Ownable, Pausable {
 
     /**
      * @notice Calculates the expected harvest reward from third party
-     * @return Expected reward to collect in KDM
+     * @return Expected reward to collect in DMD
      */
-    function calculateHarvestKDMRewards() external view returns (uint256) {
-        uint256 amount = IMasterChef_DarkMatter_KDM(masterchef).pendingKDM(0, address(this));
+    function calculateHarvestDMDRewards() external view returns (uint256) {
+        uint256 amount = IMasterChef_DarkMatter_DMD(masterchef).pendingDMD(0, address(this));
         amount = amount.add(available());
         uint256 currentCallFee = amount.mul(callFee).div(10000);
 
@@ -271,10 +271,10 @@ contract KDMVault is Ownable, Pausable {
 
     /**
      * @notice Calculates the total pending rewards that can be restaked
-     * @return Returns total pending kdm rewards
+     * @return Returns total pending DMD rewards
      */
-    function calculateTotalPendingKDMRewards() external view returns (uint256) {
-        uint256 amount = IMasterChef_DarkMatter_KDM(masterchef).pendingKDM(0, address(this));
+    function calculateTotalPendingDMDRewards() external view returns (uint256) {
+        uint256 amount = IMasterChef_DarkMatter_DMD(masterchef).pendingDMD(0, address(this));
         amount = amount.add(available());
 
         return amount;
@@ -288,7 +288,7 @@ contract KDMVault is Ownable, Pausable {
     }
 
     /**
-     * @notice Withdraws from funds from the KDM Vault
+     * @notice Withdraws from funds from the DMD Vault
      * @param _shares: Number of shares to withdraw
      */
     function withdraw(uint256 _shares) public notContract {
@@ -303,7 +303,7 @@ contract KDMVault is Ownable, Pausable {
         uint256 bal = available();
         if (bal < currentAmount) {
             uint256 balWithdraw = currentAmount.sub(bal);
-            IMasterChef_DarkMatter_KDM(masterchef).leaveStaking(balWithdraw);
+            IMasterChef_DarkMatter_DMD(masterchef).leaveStaking(balWithdraw);
             uint256 balAfter = available();
             uint256 diff = balAfter.sub(bal);
             if (diff < balWithdraw) {
@@ -318,9 +318,9 @@ contract KDMVault is Ownable, Pausable {
         }
 
         if (user.shares > 0) {
-            user.KDMAtLastUserAction = user.shares.mul(balanceOf()).div(totalShares);
+            user.DMDAtLastUserAction = user.shares.mul(balanceOf()).div(totalShares);
         } else {
-            user.KDMAtLastUserAction = 0;
+            user.DMDAtLastUserAction = 0;
         }
 
         user.lastUserActionTime = block.timestamp;
@@ -343,7 +343,7 @@ contract KDMVault is Ownable, Pausable {
      * @dev It includes tokens held by the contract and held in MasterChef
      */
     function balanceOf() public view returns (uint256) {
-        (uint256 amount, ) = IMasterChef_DarkMatter_KDM(masterchef).userInfo(0, address(this));
+        (uint256 amount, ) = IMasterChef_DarkMatter_DMD(masterchef).userInfo(0, address(this));
         return token.balanceOf(address(this)).add(amount);
     }
 
@@ -353,7 +353,7 @@ contract KDMVault is Ownable, Pausable {
     function _earn() internal {
         uint256 bal = available();
         if (bal > 0) {
-            IMasterChef_DarkMatter_KDM(masterchef).enterStaking(bal);
+            IMasterChef_DarkMatter_DMD(masterchef).enterStaking(bal);
         }
     }
 
@@ -373,17 +373,17 @@ contract KDMVault is Ownable, Pausable {
 
 pragma solidity 0.6.12;
 
-contract Allien_Boss_KDM is Ownable {
+contract Allien_Boss_DMD is Ownable {
     using SafeERC20 for IERC20;
 
-    KDMVault public immutable kdmVault;
+    DMDVault public immutable DMDVault;
 
     /**
      * @notice Constructor
-     * @param _kdmVaultAddress: KDMVault contract address
+     * @param _DMDVaultAddress: DMDVault contract address
      */
-    constructor(address _kdmVaultAddress) public {
-        kdmVault = KDMVault(_kdmVaultAddress);
+    constructor(address _DMDVaultAddress) public {
+        DMDVault = DMDVault(_DMDVaultAddress);
     }
 
     /**
@@ -392,7 +392,7 @@ contract Allien_Boss_KDM is Ownable {
      * It makes the admin == owner.
      */
     function setAdmin() external onlyOwner {
-        kdmVault.setAdmin(address(this));
+        DMDVault.setAdmin(address(this));
     }
 
     /**
@@ -400,7 +400,7 @@ contract Allien_Boss_KDM is Ownable {
      * @dev Only callable by the contract owner.
      */
     function setTreasury(address _treasury) external onlyOwner {
-        kdmVault.setTreasury(_treasury);
+        DMDVault.setTreasury(_treasury);
     }
 
     /**
@@ -408,7 +408,7 @@ contract Allien_Boss_KDM is Ownable {
      * @dev Only callable by the contract owner.
      */
     function setPerformanceFee(uint256 _performanceFee) external onlyOwner {
-        kdmVault.setPerformanceFee(_performanceFee);
+        DMDVault.setPerformanceFee(_performanceFee);
     }
 
     /**
@@ -416,7 +416,7 @@ contract Allien_Boss_KDM is Ownable {
      * @dev Only callable by the contract owner.
      */
     function setCallFee(uint256 _callFee) external onlyOwner {
-        kdmVault.setCallFee(_callFee);
+        DMDVault.setCallFee(_callFee);
     }
 
     /**
@@ -424,7 +424,7 @@ contract Allien_Boss_KDM is Ownable {
      * @dev Only callable by the contract owner.
      */
     function setWithdrawFee(uint256 _withdrawFee) external onlyOwner {
-        kdmVault.setWithdrawFee(_withdrawFee);
+        DMDVault.setWithdrawFee(_withdrawFee);
     }
 
     /**
@@ -432,14 +432,14 @@ contract Allien_Boss_KDM is Ownable {
      * @dev Only callable by the contract owner.
      */
     function setWithdrawFeePeriod(uint256 _withdrawFeePeriod) external onlyOwner {
-        kdmVault.setWithdrawFeePeriod(_withdrawFeePeriod);
+        DMDVault.setWithdrawFeePeriod(_withdrawFeePeriod);
     }
 
     /**
-     * @notice Withdraw unexpected tokens sent to the KDM Vault
+     * @notice Withdraw unexpected tokens sent to the DMD Vault
      */
     function inCaseTokensGetStuck(address _token) external onlyOwner {
-        kdmVault.inCaseTokensGetStuck(_token);
+        DMDVault.inCaseTokensGetStuck(_token);
         uint256 amount = IERC20(_token).balanceOf(address(this));
         IERC20(_token).safeTransfer(msg.sender, amount);
     }
@@ -449,7 +449,7 @@ contract Allien_Boss_KDM is Ownable {
      * @dev Only possible when contract not paused.
      */
     function pause() external onlyOwner {
-        kdmVault.pause();
+        DMDVault.pause();
     }
 
     /**
@@ -457,6 +457,6 @@ contract Allien_Boss_KDM is Ownable {
      * @dev Only possible when contract is paused.
      */
     function unpause() external onlyOwner {
-        kdmVault.unpause();
+        DMDVault.unpause();
     }
 }

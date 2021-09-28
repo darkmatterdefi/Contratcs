@@ -253,8 +253,8 @@ interface DeflationController{
 // 𝓓𝓪𝓻𝓴  𝓜𝓪𝓽𝓽𝓮𝓻
 
 contract DarkMatter is DelegateERC20, Ownable {
-    uint256 private constant initialSupply = 10000000 * 1e18; // initial supply  minted 10.000.000 KDM
-    uint256 private  constant maxSupply = 85000000 * 1e18;     // the maxSupply is 85.000.000 KDM 
+    uint256 private constant initialSupply = 10000000 * 1e18; // initial supply  minted 10.000.000 DMD
+    uint256 private  constant maxSupply = 85000000 * 1e18;     // the maxSupply is 85.000.000 DMD 
     uint256 private _burnTotal;
     address public deflationController;
     address public MasterChef; 
@@ -265,23 +265,23 @@ contract DarkMatter is DelegateERC20, Ownable {
     using EnumerableSet for EnumerableSet.AddressSet;
     EnumerableSet.AddressSet private _minters;
 
-    constructor() public ERC20("DarkMatter", "KDM"){
+    constructor() public ERC20("DarkMatter", "DMD"){
         _mint(msg.sender, initialSupply);
     }
  
     function mint(address _to, uint256 _amount) public onlyMinter returns (bool) {
-        if (_amount.add(totalSupply()) > maxSupply) {  // mint with max supply ---> only 85.000.000 KDM
+        if (_amount.add(totalSupply()) > maxSupply) {  // mint with max supply ---> only 85.000.000 DMD
             return false;
         }
         _mint(_to, _amount);
         return true;
     }
 
-    function burn(uint256 _amount) external {  // anyone can burn KDM
+    function burn(uint256 _amount) external {  // anyone can burn DMD
     _burn(address(msg.sender), _amount);
     }
     
-    function Total_KDM_Burn() public view returns (uint256) {
+    function Total_DMD_Burn() public view returns (uint256) {
         return _burnTotal;
     }
     
