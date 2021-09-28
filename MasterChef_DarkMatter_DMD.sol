@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
-import "./DarkMatter_KDM.sol";
+import "./DarkMatter_DMD.sol";
 
 
 
@@ -22,21 +22,21 @@ interface IMasterChef {
     function withdraw(uint256 _pid, uint256 _amount) external;
     function enterStaking(uint256 _amount) external;
     function leaveStaking(uint256 _amount) external;
-    function pendingKDM(uint256 _pid, address _user) external view returns (uint256);
+    function pendingDMD(uint256 _pid, address _user) external view returns (uint256);
     function userInfo(uint256 _pid, address _user) external view returns (uint256, uint256);
     function emergencyWithdraw(uint256 _pid) external;
 
 }   
 
 pragma solidity ^0.6.12;
-// MasterChef is the master of KDM. He can make KDM and he is a fair guy.
+// MasterChef is the master of DMD. He can make DMD and he is a fair guy.
 //
 // Note that it's ownable and the owner wields tremendous power. The ownership
-// will be transferred to a governance smart contract once KDM is sufficiently
+// will be transferred to a governance smart contract once DMD is sufficiently
 // distributed and the community can show to govern itself.
 //
 // Have fun reading it. Hopefully it's bug-free. God bless.
-contract MasterChef_DarkMatter_KDM is Ownable, ReentrancyGuard {
+contract MasterChef_DarkMatter_DMD is Ownable, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -45,13 +45,13 @@ contract MasterChef_DarkMatter_KDM is Ownable, ReentrancyGuard {
         uint256 amount;         // How many LP tokens the user has provided.
         uint256 rewardDebt;     // Reward debt. See explanation below.
         //
-        // We do some fancy math here. Basically, any point in time, the amount of KDMs
+        // We do some fancy math here. Basically, any point in time, the amount of DMDs
         // entitled to a user but is pending to be distributed is:
         //
-        //   pending reward = (user.amount * pool.accKDMPerShare) - user.rewardDebt
+        //   pending reward = (user.amount * pool.accDMDPerShare) - user.rewardDebt
         //
         // Whenever a user deposits or withdraws LP tokens to a pool. Here's what happens:
-        //   1. The pool's `accKDMPerShare` (and `lastRewardBlock`) gets updated.
+        //   1. The pool's `accDMDPerShare` (and `lastRewardBlock`) gets updated.
         //   2. User receives the pending reward sent to his/her address.
         //   3. User's `amount` gets updated.
         //   4. User's `rewardDebt` gets updated.
@@ -60,32 +60,32 @@ contract MasterChef_DarkMatter_KDM is Ownable, ReentrancyGuard {
     // Info of each pool.
     struct PoolInfo {
         IERC20 lpToken;           // Address of LP token contract.
-        uint256 allocPoint;       // How many allocation points assigned to this pool. KDMs to distribute per block.
-        uint256 lastRewardBlock;  // Last block number that KDMs distribution occurs.
-        uint256 accKDMPerShare;   // Accumulated KDMs per share, times 1e12. See below.
+        uint256 allocPoint;       // How many allocation points assigned to this pool. DMDs to distribute per block.
+        uint256 lastRewardTime;  // Last block number that DMDs distribution occurs.
+        uint256 accDMDPerShare;   // Accumulated DMDs per share, times 1e12. See below.
         uint16 depositFeeBP;      // Deposit fee in basis points
     }
 
-    // The KDM TOKEN!
-    DarkMatter public KDM;
+    // The DMD TOKEN!
+    DarkMatter public DMD;
     // Dev address.
     address public dev_address;
-    // KDM tokens created per block.
-    uint256 public KDMPerBlock;
-    // Bonus muliplier for early KDM makers.
+    // DMD tokens created per block.
+    uint256 public DMDPerSecond;
+    // Bonus muliplier for early DMD makers.
     uint256 public constant BONUS_MULTIPLIER = 1;
     // Deposit Fee address
     address public feeAddress;
-
     // Info of each pool.
     PoolInfo[] public poolInfo;
     // Info of each user that stakes LP tokens.
     mapping(uint256 => mapping(address => UserInfo)) public userInfo;
     // Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
-    // The block number when KDM mining starts.
-    uint256 public startBlock;
-
+    //a maximum of 2 per second is set.
+    uint256 public constant maxDMDPerSecond = 2e18;
+    // Timestamp startTime.
+    uint256 public immutable startTime;
 
     // events 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
@@ -93,25 +93,25 @@ contract MasterChef_DarkMatter_KDM is Ownable, ReentrancyGuard {
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event SetFeeAddress(address indexed user, address indexed newAddress);
     event Setdev_address(address indexed user, address indexed newAddress);
-    event UpdateEmissionRate(address indexed user, uint256 KDMPerBlock);
+    event UpdateEmissionRate(address indexed user, uint256 DMDPerSecond);
 
     constructor(
-        DarkMatter _KDM,
-        uint256 _KDMPerBlock,
-        uint256 _startBlock
+        DarkMatter _DMD,
+        uint256 _DMDPerSecond,
+        uint256 _startTime
     ) public {
-        KDM = _KDM;
+        DMD = _DMD;
         dev_address = msg.sender;
         feeAddress = msg.sender;
-        KDMPerBlock = _KDMPerBlock;
-        startBlock = _startBlock;
+        DMDPerSecond = _DMDPerSecond;
+        startTime = _startTime;
    
         // staking pool
         poolInfo.push(PoolInfo({
-            lpToken: _KDM,
+            lpToken: _DMD,
             allocPoint: 1000,
-            lastRewardBlock: startBlock,
-            accKDMPerShare: 0,
+            lastRewardTime: _startTime,
+            accDMDPerShare: 0,
             depositFeeBP: 0
         }));
 
@@ -136,20 +136,20 @@ contract MasterChef_DarkMatter_KDM is Ownable, ReentrancyGuard {
         if (_withUpdate) {
             massUpdatePools();
         }
-        uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
+        uint256 lastRewardTime = block.timestamp > startTime ? block.timestamp : startTime;
         totalAllocPoint = totalAllocPoint.add(_allocPoint);
         poolExistence[_lpToken] = true;
         poolInfo.push(PoolInfo({
         lpToken : _lpToken,
         allocPoint : _allocPoint,
-        lastRewardBlock : lastRewardBlock,
-        accKDMPerShare : 0,
+        lastRewardTime : lastRewardTime,
+        accDMDPerShare : 0,
         depositFeeBP : _depositFeeBP
         }));
         updateStakingPool();
     }
 
-    // Update the given pool's KDM allocation point and deposit fee. Can only be called by the owner.
+    // Update the given pool's DMD allocation point and deposit fee. Can only be called by the owner.
     function set(uint256 _pid, uint256 _allocPoint, uint16 _depositFeeBP, bool _withUpdate) public onlyOwner {
         require(_depositFeeBP <= 1000, "set: invalid deposit fee basis points"); // 1000 is 10% 
         if (_withUpdate) {
@@ -179,18 +179,18 @@ contract MasterChef_DarkMatter_KDM is Ownable, ReentrancyGuard {
         return _to.sub(_from).mul(BONUS_MULTIPLIER);
     }
 
-    // View function to see pending KDMs on frontend.
-    function pendingKDM(uint256 _pid, address _user) external view returns (uint256) {
+    // View function to see pending DMDs on frontend.
+    function pendingDMD(uint256 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
-        uint256 accKDMPerShare = pool.accKDMPerShare;
+        uint256 accDMDPerShare = pool.accDMDPerShare;
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
-        if (block.number > pool.lastRewardBlock && lpSupply != 0) {
-            uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-            uint256 KDMReward = multiplier.mul(KDMPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-            accKDMPerShare = accKDMPerShare.add(KDMReward.mul(1e12).div(lpSupply));
+        if (block.timestamp >  pool.lastRewardTime && lpSupply != 0) {
+            uint256 multiplier = getMultiplier( pool.lastRewardTime, block.timestamp);
+            uint256 DMDReward = multiplier.mul(DMDPerSecond).mul(pool.allocPoint).div(totalAllocPoint);
+            accDMDPerShare = accDMDPerShare.add(DMDReward.mul(1e12).div(lpSupply));
         }
-        return user.amount.mul(accKDMPerShare).div(1e12).sub(user.rewardDebt);
+        return user.amount.mul(accDMDPerShare).div(1e12).sub(user.rewardDebt);
     }
 
     // Update reward variables for all pools. Be careful of gas spending!
@@ -204,32 +204,32 @@ contract MasterChef_DarkMatter_KDM is Ownable, ReentrancyGuard {
     // Update reward variables of the given pool to be up-to-date.
     function updatePool(uint256 _pid) public {
         PoolInfo storage pool = poolInfo[_pid];
-        if (block.number <= pool.lastRewardBlock) {
+        if (block.timestamp <=  pool.lastRewardTime) {
             return;
         }
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
         if (lpSupply == 0 || pool.allocPoint == 0) {
-            pool.lastRewardBlock = block.number;
+             pool.lastRewardTime = block.timestamp;
             return;
         }
-        uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-        uint256 KDMReward = multiplier.mul(KDMPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-        KDM.mint(dev_address, KDMReward.div(10));
-        KDM.mint(address(this), KDMReward);
-        pool.accKDMPerShare = pool.accKDMPerShare.add(KDMReward.mul(1e12).div(lpSupply));
-        pool.lastRewardBlock = block.number;
+        uint256 multiplier = getMultiplier( pool.lastRewardTime, block.timestamp);
+        uint256 DMDReward = multiplier.mul(DMDPerSecond).mul(pool.allocPoint).div(totalAllocPoint);
+        DMD.mint(dev_address, DMDReward.div(10));
+        DMD.mint(address(this), DMDReward);
+        pool.accDMDPerShare = pool.accDMDPerShare.add(DMDReward.mul(1e12).div(lpSupply));
+         pool.lastRewardTime = block.timestamp;
     }
 
-    // Deposit LP tokens to MasterChef for KDM allocation.
+    // Deposit LP tokens to MasterChef for DMD allocation.
     function deposit(uint256 _pid, uint256 _amount) public nonReentrant {
-        require (_pid != 0, 'deposit KDM by staking');
+        require (_pid != 0, 'deposit DMD by staking');
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         updatePool(_pid);
         if (user.amount > 0) {
-            uint256 pending = user.amount.mul(pool.accKDMPerShare).div(1e12).sub(user.rewardDebt);
+            uint256 pending = user.amount.mul(pool.accDMDPerShare).div(1e12).sub(user.rewardDebt);
             if (pending > 0) {
-                safeKDMTransfer(msg.sender, pending);
+                safeDMDTransfer(msg.sender, pending);
             }
         }
         if (_amount > 0) {
@@ -242,64 +242,64 @@ contract MasterChef_DarkMatter_KDM is Ownable, ReentrancyGuard {
                 user.amount = user.amount.add(_amount);
             }
         }
-        user.rewardDebt = user.amount.mul(pool.accKDMPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accDMDPerShare).div(1e12);
         emit Deposit(msg.sender, _pid, _amount);
     }
 
     // Withdraw LP tokens from MasterChef.
     function withdraw(uint256 _pid, uint256 _amount) public nonReentrant {
-        require (_pid != 0, 'withdraw KDM by unstaking');
+        require (_pid != 0, 'withdraw DMD by unstaking');
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
-        uint256 pending = user.amount.mul(pool.accKDMPerShare).div(1e12).sub(user.rewardDebt);
+        uint256 pending = user.amount.mul(pool.accDMDPerShare).div(1e12).sub(user.rewardDebt);
         if (pending > 0) {
-            safeKDMTransfer(msg.sender, pending);
+            safeDMDTransfer(msg.sender, pending);
         }
         if (_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accKDMPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accDMDPerShare).div(1e12);
         emit Withdraw(msg.sender, _pid, _amount);
     }
     
-     // Stake  KDM tokens to MasterChef
+     // Stake  DMD tokens to MasterChef
     
     function enterStaking(uint256 _amount) public nonReentrant  {
         PoolInfo storage pool = poolInfo[0];
         UserInfo storage user = userInfo[0][msg.sender];
         updatePool(0);
         if (user.amount > 0) {
-            uint256 pending = user.amount.mul(pool.accKDMPerShare).div(1e12).sub(user.rewardDebt);
+            uint256 pending = user.amount.mul(pool.accDMDPerShare).div(1e12).sub(user.rewardDebt);
             if(pending > 0) {
-                safeKDMTransfer(msg.sender, pending);
+                safeDMDTransfer(msg.sender, pending);
             }
         }
         if(_amount > 0) {
             pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
             user.amount = user.amount.add(_amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accKDMPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accDMDPerShare).div(1e12);
         emit Deposit(msg.sender, 0, _amount);
     }
 
-    // Withdraw KDM tokens from STAKING.
+    // Withdraw DMD tokens from STAKING.
     function leaveStaking(uint256 _amount) public nonReentrant  {
         PoolInfo storage pool = poolInfo[0];
         UserInfo storage user = userInfo[0][msg.sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(0);
-        uint256 pending = user.amount.mul(pool.accKDMPerShare).div(1e12).sub(user.rewardDebt);
+        uint256 pending = user.amount.mul(pool.accDMDPerShare).div(1e12).sub(user.rewardDebt);
         if(pending > 0) {
-            safeKDMTransfer(msg.sender, pending);
+            safeDMDTransfer(msg.sender, pending);
         }
         if(_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accKDMPerShare).div(1e12);
+        user.rewardDebt = user.amount.mul(pool.accDMDPerShare).div(1e12);
 
         emit Withdraw(msg.sender, 0, _amount);
     }
@@ -315,16 +315,16 @@ contract MasterChef_DarkMatter_KDM is Ownable, ReentrancyGuard {
         emit EmergencyWithdraw(msg.sender, _pid, amount);
     }
 
-    // Safe KDM transfer function, just in case if rounding error causes pool to not have enough KDMs.
-    function safeKDMTransfer(address _to, uint256 _amount) internal {
-        uint256 KDMBal = KDM.balanceOf(address(this));
+    // Safe DMD transfer function, just in case if rounding error causes pool to not have enough DMDs.
+    function safeDMDTransfer(address _to, uint256 _amount) internal {
+        uint256 DMDBal = DMD.balanceOf(address(this));
         bool transferSuccess = false;
-        if (_amount > KDMBal) {
-            transferSuccess = KDM.transfer(_to, KDMBal);
+        if (_amount > DMDBal) {
+            transferSuccess = DMD.transfer(_to, DMDBal);
         } else {
-            transferSuccess = KDM.transfer(_to, _amount);
+            transferSuccess = DMD.transfer(_to, _amount);
         }
-        require(transferSuccess, "safeKDMTransfer: transfer failed");
+        require(transferSuccess, "safeDMDTransfer: transfer failed");
     }
 
     // Update dev address by the previous dev.
@@ -342,10 +342,10 @@ contract MasterChef_DarkMatter_KDM is Ownable, ReentrancyGuard {
         emit SetFeeAddress(msg.sender, _feeAddress);
     }
 
-   // Update emission rate by the owner
-    function updateEmissionRate(uint256 _KDMPerBlock) public onlyOwner {
+   // Update DMD per Second
+    function setDMDPerSecond (uint256 _DMDPerSecond) public onlyOwner {
+        require(_DMDPerSecond <= maxDMDPerSecond, "setDMDPerSecond: you are stupid? max 2!");
         massUpdatePools();
-        emit UpdateEmissionRate(msg.sender, _KDMPerBlock);
-        KDMPerBlock = _KDMPerBlock;
+        DMDPerSecond = _DMDPerSecond;
     }
 }
