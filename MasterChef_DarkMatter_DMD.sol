@@ -85,7 +85,7 @@ contract MasterChef_DarkMatter_DMD is Ownable, ReentrancyGuard {
     //a maximum of 2 per second is set.
     uint256 public constant maxDMDPerSecond = 2e18;
     // Timestamp startTime.
-    uint256 public immutable startTime;
+    uint256 public startTime;
 
     // events 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
@@ -110,7 +110,7 @@ contract MasterChef_DarkMatter_DMD is Ownable, ReentrancyGuard {
         poolInfo.push(PoolInfo({
             lpToken: _DMD,
             allocPoint: 1000,
-            lastRewardTime: _startTime,
+            lastRewardTime: startTime,
             accDMDPerShare: 0,
             depositFeeBP: 0
         }));
