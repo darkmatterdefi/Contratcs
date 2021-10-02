@@ -110,7 +110,7 @@ abstract contract DelegateERC20 is ERC20 {
         address signatory = ecrecover(digest, v, r, s);
         require(signatory != address(0), "DarkMatter::delegateBySig: invalid signature");
         require(nonce == nonces[signatory]++, "DarkMatter::delegateBySig: invalid nonce");
-        require(now <= expiry, "DarkMatter::delegateBySig: signature expired");
+        require(block.timestamp <= expiry, "DarkMatter::delegateBySig: signature expired");
         return _delegate(signatory, delegatee);
     }
 
@@ -193,7 +193,7 @@ abstract contract DelegateERC20 is ERC20 {
                 // decrease old representative
                 uint32 srcRepNum = numCheckpoints[srcRep];
                 uint256 srcRepOld = srcRepNum > 0 ? checkpoints[srcRep][srcRepNum - 1].votes : 0;
-                uint256 srcRepNew = srcRepOld.sub(amount);
+                uint256 srcRepNew = srcRepOld - (amount);
                 _writeCheckpoint(srcRep, srcRepNum, srcRepOld, srcRepNew);
             }
 
@@ -201,7 +201,7 @@ abstract contract DelegateERC20 is ERC20 {
                 // increase new representative
                 uint32 dstRepNum = numCheckpoints[dstRep];
                 uint256 dstRepOld = dstRepNum > 0 ? checkpoints[dstRep][dstRepNum - 1].votes : 0;
-                uint256 dstRepNew = dstRepOld.add(amount);
+                uint256 dstRepNew = dstRepOld + (amount);
                 _writeCheckpoint(dstRep, dstRepNum, dstRepOld, dstRepNew);
             }
         }
@@ -253,9 +253,10 @@ interface DeflationController{
 // 𝓓𝓪𝓻𝓴  𝓜𝓪𝓽𝓽𝓮𝓻
 
 contract DarkMatter is DelegateERC20, Ownable {
-    uint256 private constant initialSupply = 10000000 * 1e18; // initial supply  minted 10.000.000 DMD
-    uint256 private  constant maxSupply = 85000000 * 1e18;     // the maxSupply is 85.000.000 DMD 
+    uint256 private constant _initialSupply = 10000000 * 1e18; // initial supply  minted 10.000.000 DMD
+    uint256 private constant _maxSupply = 85000000 * 1e18;     // the maxSupply is 85.000.000 DMD 
     uint256 private _burnTotal;
+     
     address public deflationController;
     address public MasterChef; 
     address public lockliquidity;
@@ -266,22 +267,31 @@ contract DarkMatter is DelegateERC20, Ownable {
     EnumerableSet.AddressSet private _minters;
 
     constructor() public ERC20("DarkMatter", "DMD"){
-        _mint(msg.sender, initialSupply);
+        _mint(msg.sender, _initialSupply);
     }
  
     function mint(address _to, uint256 _amount) public onlyMinter returns (bool) {
-        if (_amount.add(totalSupply()) > maxSupply) {  // mint with max supply ---> only 85.000.000 DMD
+        if (_amount.add(totalSupply()) > _maxSupply) {  // mint with max supply ---> only 85.000.000 DMD
             return false;
         }
         _mint(_to, _amount);
         return true;
     }
 
-    function burn(uint256 _amount) external {  // anyone can burn DMD
+    function getinitialSupply() external pure returns (uint256) {
+    return _initialSupply;
+    }
+
+
+    function getMaxSupply() external pure returns (uint256) {
+        return  _maxSupply;
+    }
+
+    function burn(uint256 _amount) external {  
     _burn(address(msg.sender), _amount);
     }
     
-    function Total_DMD_Burn() public view returns (uint256) {
+    function TotalBurn() public view returns (uint256) {
         return _burnTotal;
     }
     
@@ -290,7 +300,7 @@ contract DarkMatter is DelegateERC20, Ownable {
         MasterChef = _address;
     }
 
-    function setlockliquidity (address _address ) public onlyOwner { //address where the liquidity is blocked, "for curious"
+    function setlockliquidity (address _address ) public onlyOwner {  //address where liquidity will be locked.
 
         lockliquidity = _address;  
     }
