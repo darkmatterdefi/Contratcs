@@ -84,11 +84,7 @@ contract MasterChef_DarkMatter_DMD is Ownable, ReentrancyGuard {
     uint256 public totalAllocPoint = 0;
     //a maximum of 2 per second is set.
     uint256 public constant maxDMDPerSecond = 2e18;
-<<<<<<< HEAD
-    // Timestamp start Time.
-=======
     // Timestamp startTime.
->>>>>>> main
     uint256 public startTime;
 
     // events 
