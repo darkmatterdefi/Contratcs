@@ -339,11 +339,7 @@ contract DarkMatter is DelegateERC20, Ownable {
      * - the caller must have allowance for `sender`'s tokens of at least
      * `amount`.
      */
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) public  override returns (bool) {
+    function transferFrom(address sender,address recipient,uint256 amount) public  override returns (bool) {
           uint256 toBurn = 0;
 
          if(address(0)!=deflationController && amount>0)
