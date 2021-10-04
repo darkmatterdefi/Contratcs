@@ -289,9 +289,10 @@ contract DarkMatter is DelegateERC20, Ownable {
 
     function burn(uint256 _amount) external {  
     _burn(address(msg.sender), _amount);
+    _burnTotal = _burnTotal + _amount;
     }
     
-    function TotalBurn() public view returns (uint256) {
+    function burnTotal () public view returns (uint256) {
         return _burnTotal;
     }
     
