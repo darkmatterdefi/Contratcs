@@ -232,8 +232,11 @@ contract MasterChef_DarkMatter_DMD is Ownable, ReentrancyGuard {
                 safeDMDTransfer(msg.sender, pending);
             }
         }
-        if (_amount > 0) {
+          if (_amount > 0) {
+            uint256 balanceBefore = pool.lpToken.balanceOf(address(this));
             pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
+            _amount = pool.lpToken.balanceOf(address(this)) - balanceBefore;
+        
             if (pool.depositFeeBP > 0) {
                 uint256 depositFee = _amount.mul(pool.depositFeeBP).div(10000);
                 pool.lpToken.safeTransfer(feeAddress, depositFee);
