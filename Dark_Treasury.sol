@@ -16,7 +16,7 @@ contract Dark_Treasury is Ownable {
         IERC20(_token).safeTransfer(_to, _amount);
     }
 
-    function withdrawKcs (address payable _to, uint256 _amount) external onlyOwner {
+    function withdrawFtm (address payable _to, uint256 _amount) external onlyOwner {
         _to.transfer(_amount);
     }
 

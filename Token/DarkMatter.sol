@@ -1,14 +1,16 @@
+
 // SPDX-License-Identifier: MIT
+// https://t.me/darkmatterdefi
 
 pragma solidity ^0.6.12;
 import "@openzeppelin/contracts/GSN/Context.sol"; 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 
 pragma experimental ABIEncoderV2;
@@ -252,15 +254,18 @@ interface DeflationController{
 }
 // 𝓓𝓪𝓻𝓴  𝓜𝓪𝓽𝓽𝓮𝓻
 
-contract DarkMatter is DelegateERC20, Ownable {
-    uint256 private constant _initialSupply = 10000000 * 1e18; // initial supply  minted 10.000.000 DMD
+contract DarkMatter is DelegateERC20, Pausable, Ownable {
+    uint256 private constant _initialSupply = 10000000 * 1e18; // initial supply  minted 10.000.000 DMD  
     uint256 private constant _maxSupply = 85000000 * 1e18;     // the maxSupply is 85.000.000 DMD 
     uint256 private _burnTotal;
-     
+    
     address public deflationController;
     address public MasterChef; 
     address public lockliquidity;
+    
     event SetDeflationController(address indexed _address);
+    event SetMarterChef(address indexed _address);
+    event Setlockliquidity(address indexed _address);
    
    
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -307,7 +312,7 @@ contract DarkMatter is DelegateERC20, Ownable {
     }
   
     
-     function transfer(address recipient, uint256 amount) public  override returns (bool) {
+     function transfer(address recipient, uint256 amount) public whenNotPaused override returns (bool) {
          uint256 toBurn = 0;
 
         if(address(0)!=deflationController && amount>0)
@@ -340,7 +345,7 @@ contract DarkMatter is DelegateERC20, Ownable {
      * - the caller must have allowance for `sender`'s tokens of at least
      * `amount`.
      */
-    function transferFrom(address sender,address recipient,uint256 amount) public  override returns (bool) {
+    function transferFrom(address sender,address recipient,uint256 amount) public whenNotPaused override returns (bool) {
           uint256 toBurn = 0;
 
          if(address(0)!=deflationController && amount>0)
@@ -390,5 +395,18 @@ contract DarkMatter is DelegateERC20, Ownable {
         require(isMinter(msg.sender), "caller is not the minter");
         _;
     }
+//warning
+//The contract pause function will only be activated during the presale (why? "Some smart guy" could add the liquidity first than us giving a higher or lower price).
+// the owner of the token will be the Timelock and this function will not should be used at no time after the presale.
+
+     function pause() public onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
+
+    }
+
 
 }
