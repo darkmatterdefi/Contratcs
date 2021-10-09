@@ -706,8 +706,6 @@ interface DarkMatter {
     function unpause() external;
 }
 
-pragma solidity ^0.6.0;
-
 interface ISpookySwapRouter02 {
     function addLiquidityETH(
         address token,
@@ -723,7 +721,7 @@ contract Presale  is Ownable {
     using SafeMath for uint256;
 
     DarkMatter public token;
-    ISpookySwapRouter02 internal spookyswapRouter = IBSCswapRouter02(0xf491e7b69e4244ad4002bc14e878a34207e38c29);
+    ISpookySwapRouter02 internal spookyswapRouter = ISpookySwapRouter02(0xf491e7b69e4244ad4002bc14e878a34207e38c29);
 
     uint256 public presaleStartTimestamp;
     uint256 public presaleEndTimestamp;
