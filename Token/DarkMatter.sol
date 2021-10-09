@@ -306,9 +306,8 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
     using EnumerableSet for EnumerableSet.AddressSet;
     EnumerableSet.AddressSet private _minters;
 
-    constructor(address _presale) public ERC20("DarkMatter", "DMD") {
+    constructor() public ERC20("DarkMatter", "DMD") {
         _pause();
-        presale = _presale;
         _mint(msg.sender, _initialSupply);
     }
 
