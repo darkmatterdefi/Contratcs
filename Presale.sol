@@ -801,6 +801,10 @@ interface DarkMatter {
     function mint(address to, uint256 value) external;
 
     function unpause() external;
+
+    function balanceOf(address account) external returns (uint256 amount);
+
+    function approve(address spender, uint256 amount) external;
 }
 
 interface ISpookySwapRouter02 {
