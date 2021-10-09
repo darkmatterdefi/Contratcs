@@ -717,7 +717,7 @@ interface ISpookySwapRouter02 {
     ) external payable returns (uint amountToken, uint amountETH, uint liquidity) {
 }
 
-contract Presale  is Ownable {
+contract Presale is Ownable {
     using SafeMath for uint256;
 
     DarkMatter public token;
