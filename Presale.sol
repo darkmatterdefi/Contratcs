@@ -914,6 +914,7 @@ contract Presale is Ownable {
                 totalDepositedEthBalance < hardCapEthAmount,
             "presale failed"
         );
+        require(deposits[msg.sender] > 0, "no deposit");
         payable(msg.sender).transfer(deposits[msg.sender]);
         deposits[msg.sender] = 0;
     }
