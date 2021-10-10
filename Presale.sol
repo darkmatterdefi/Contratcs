@@ -914,11 +914,6 @@ contract Presale is Ownable {
                 totalDepositedEthBalance < hardCapEthAmount,
             "presale failed"
         );
-        token.transferFrom(
-            msg.sender,
-            0x000000000000000000000000000000000000dEaD,
-            token.balanceOf(address(msg.sender))
-        );
         payable(msg.sender).transfer(deposits[msg.sender]);
         deposits[msg.sender] = 0;
     }
