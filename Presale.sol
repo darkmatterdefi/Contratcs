@@ -805,6 +805,12 @@ interface DarkMatter {
     function balanceOf(address account) external returns (uint256 amount);
 
     function approve(address spender, uint256 amount) external;
+
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 }
 
 interface ISpookySwapRouter02 {
@@ -880,14 +886,16 @@ contract Presale is Ownable {
 
     function releaseFunds() external onlyOwner {
         require(
-            now >= presaleEndTimestamp ||
+            (now >= presaleEndTimestamp &&
+                totalDepositedEthBalance == hardCapEthAmount) ||
                 totalDepositedEthBalance == hardCapEthAmount,
             "presale is active"
         );
         uint256 amountFtm = address(this).balance;
-        uint256 amountToken = token.balanceOf(address(this));
+        uint256 amountToken = 250000 ether;
 
         token.unpause();
+        token.mint(address(this), amountToken);
         token.approve(address(spookyswapRouter), amountToken);
         spookyswapRouter.addLiquidityETH{value: amountFtm}(
             address(token),
@@ -899,12 +907,20 @@ contract Presale is Ownable {
         );
     }
 
-    // use in case of get stuck
-    function withdrawftm(address payable _to, uint256 _amount)
-        external
-        onlyOwner
-    {
-        _to.transfer(_amount);
+    // If presale amount doesn't get reached
+    function reclaimftm() external {
+        require(
+            now >= presaleEndTimestamp &&
+                totalDepositedEthBalance < hardCapEthAmount,
+            "presale failed"
+        );
+        token.transferFrom(
+            msg.sender,
+            0x000000000000000000000000000000000000dEaD,
+            token.balanceOf(address(msg.sender))
+        );
+        payable(msg.sender).transfer(deposits[msg.sender]);
+        deposits[msg.sender] = 0;
     }
 
     // recover tokens ERC20 sent in error.

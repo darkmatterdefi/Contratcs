@@ -290,7 +290,7 @@ interface DeflationController {
 // 𝓓𝓪𝓻𝓴  𝓜𝓪𝓽𝓽𝓮𝓻
 
 contract DarkMatter is DelegateERC20, Pausable, Ownable {
-    uint256 private constant _initialSupply = 10000000 * 1e18; // initial supply  minted 10.000.000 DMD
+    uint256 private constant _initialSupply = 9350000 * 1e18; // initial supply  minted 10.000.000 DMD
     uint256 private constant _maxSupply = 85000000 * 1e18; // the maxSupply is 85.000.000 DMD
     uint256 private _burnTotal;
 
