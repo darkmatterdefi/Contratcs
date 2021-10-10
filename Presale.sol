@@ -836,7 +836,7 @@ contract Presale is Ownable {
 
     DarkMatter public token;
     ISpookySwapRouter02 internal spookyswapRouter =
-        ISpookySwapRouter02(0xf491e7b69e4244ad4002bc14e878a34207e38c29);
+        ISpookySwapRouter02(0xF491e7B69E4244ad4002BC14e878a34207E38c29);
 
     uint256 public presaleStartTimestamp;
     uint256 public presaleEndTimestamp;
@@ -850,8 +850,8 @@ contract Presale is Ownable {
 
     constructor(DarkMatter _token) public {
         token = _token;
-        presaleStartTimestamp = now;
-        presaleEndTimestamp = now.add(24 hours + 10 minutes);
+        presaleStartTimestamp =  1633896000;
+            presaleEndTimestamp = presaleStartTimestamp.add(2 days);
     }
 
     receive() external payable {
