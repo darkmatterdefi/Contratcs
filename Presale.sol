@@ -843,7 +843,7 @@ contract Presale is Ownable {
     uint256 public softCapEthAmount = 30000 ether;
     uint256 public hardCapEthAmount = 100000 ether;
     uint256 public totalDepositedEthBalance;
-    uint256 public minimumDepositEthAmount = 10 ether;
+    uint256 public minimumDepositEthAmount = 0 ether; // should always be 0
     uint256 public maximumDepositEthAmount = 2000 ether;
 
     mapping(address => uint256) public deposits;
