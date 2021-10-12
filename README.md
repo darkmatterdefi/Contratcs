@@ -18,7 +18,7 @@ TimelockToken 1Month> https://ftmscan.com/address/0x7700ae48bc646111bd4d71d56b84
 
 Presale> https://ftmscan.com/address/0x4aad757bae148528335339f350ab08e70094e190#code 
 
-txHash BurnLiquidity> https://ftmscan.com/tx/0x394c019244e41e108272301cd2726f7c676d3c0abc6216efb146689db729f216
+txHash Liquidity> https://ftmscan.com/tx/0x394c019244e41e108272301cd2726f7c676d3c0abc6216efb146689db729f216
 
 MultiSig> https://ftmscan.com/address/0x06310109f32A9545b25E02f9D7Fa19Fa3FF82428#code
 
