@@ -2,9 +2,9 @@
 
 DarkMatter (DMD)> https://ftmscan.com/address/0x90e892fed501ae00596448aecf998c88816e5c0f
 
-Timelock DMD 2days> https://ftmscan.com/address/0x04e1ec970996ea8e88fb7ab8dcdb1fffed03d60a#code
+Timelock DMD 7H>https://ftmscan.com/address/0x1e59a21b5c4c99795335c1b89b4f731521a76469#code
 
- 
+Masterchef: https://ftmscan.com/address/0x7c36c64811219cf9b797c5d9b264d9e7cdade7a4#code
 
 Timelock 6H (MasterChef)> https://ftmscan.com/address/0x92fa6f5fc4b768e8e32b6bd3803d5f24759e720d#code
 
