@@ -22,6 +22,8 @@ txHash Liquidity> https://ftmscan.com/tx/0x394c019244e41e108272301cd2726f7c676d3
 
 MultiSig> https://ftmscan.com/address/0x06310109f32A9545b25E02f9D7Fa19Fa3FF82428#code
 
+FT (NFT)> https://ftmscan.com/address/0xbb9119f0dc860bb916be01196935e3078829cbd3#code
+
 
 
 
