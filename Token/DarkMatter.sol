@@ -345,13 +345,21 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
 
     function setMasterChef(address _masterChef) public onlyOwner {
         //Masterchef contract address.
+<<<<<<< Updated upstream
+=======
+        require(MasterChef != address(0), "!nonzero");
+>>>>>>> Stashed changes
         MasterChef = _masterChef;
         emit SetMarterChef (msg.sender, _masterChef);
     }
 
     function setlockliquidity(address _lockliquidity) public onlyOwner {
         //address where liquidity will be locked.
+<<<<<<< Updated upstream
 
+=======
+        require(lockliquidity != address(0), "!nonzero");
+>>>>>>> Stashed changes
         lockliquidity = _lockliquidity;
         emit Setlockliquidity(msg.sender, _lockliquidity);
     }
@@ -487,6 +495,7 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
     // the owner of the token will be the Timelock and this function will not should be used at no time after the presale.
 
     function setPresale(address _presale) external onlyOwner {
+        require(presale != address(0), "!nonzero");
         presale = _presale;
         emit SetPresale (msg.sender, _presale);
     }
