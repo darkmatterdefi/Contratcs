@@ -2010,14 +2010,9 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
           if (_amount > 0) {
              uint256 beforeDeposit = pool.lpToken.balanceOf(address(this));
             pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
-<<<<<<< Updated upstream
-            _amount = pool.lpToken.balanceOf(address(this)) - balanceBefore;
-   
-=======
             uint256 afterDeposit = pool.lpToken.balanceOf(address(this));
             _amount = afterDeposit.sub(beforeDeposit);
- 
->>>>>>> Stashed changes
+            
             if (pool.depositFeeBP > 0) {
                 uint256 depositFee = _amount.mul(pool.depositFeeBP).div(10000);
                 pool.lpToken.safeTransfer(feeAddress, depositFee);
