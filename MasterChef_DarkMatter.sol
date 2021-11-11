@@ -1791,7 +1791,6 @@ interface IMasterChef {
     function emergencyWithdraw(uint256 _pid) external;
 
 }   
-
 pragma solidity ^0.6.12;
 // MasterChef is the master of DMD. He can make DMD and he is a fair guy.
 //
@@ -1852,12 +1851,14 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
     uint256 public startTime;
 
     // events 
+    event Add(address indexed user, uint256 allocPoint, IERC20 indexed token, uint16 depositFeeBP, bool withUpdate);
+    event Set(address indexed user, uint256 pid, uint256 allocPoint,uint16 depositFeeBP, bool withUpdate);
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event SetFeeAddress(address indexed user, address indexed newAddress);
     event Setdev_address(address indexed user, address indexed newAddress);
-    
+    event SetDMDPerSecond (address indexed user, uint256 DMDPerSecond);
 
     constructor(
         DarkMatter _DMD,
@@ -1910,7 +1911,8 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
         accDMDPerShare : 0,
         depositFeeBP : _depositFeeBP
         }));
-         
+        
+        emit Add(msg.sender, _allocPoint, _lpToken, _depositFeeBP, _withUpdate);
     }
 
     // Update the given pool's DMD allocation point and deposit fee. Can only be called by the owner.
@@ -1922,7 +1924,9 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
         totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(_allocPoint);
         poolInfo[_pid].allocPoint = _allocPoint;
         poolInfo[_pid].depositFeeBP = _depositFeeBP;
-   
+        
+        emit Set(msg.sender, _pid, _allocPoint, _depositFeeBP, _withUpdate);
+         
     }
   
     // Return reward multiplier over the given _from to _to block.
@@ -1950,6 +1954,7 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
         for (uint256 pid = 0; pid < length; ++pid) {
             updatePool(pid);
         }
+        
     }
 
     // Update reward variables of the given pool to be up-to-date.
@@ -1987,7 +1992,7 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
             uint256 balanceBefore = pool.lpToken.balanceOf(address(this));
             pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
             _amount = pool.lpToken.balanceOf(address(this)) - balanceBefore;
-        
+   
             if (pool.depositFeeBP > 0) {
                 uint256 depositFee = _amount.mul(pool.depositFeeBP).div(10000);
                 pool.lpToken.safeTransfer(feeAddress, depositFee);
@@ -2101,7 +2106,7 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
         require(_DMDPerSecond <= maxDMDPerSecond, "setDMDPerSecond: you are stupid? max 2!");
         massUpdatePools();
         DMDPerSecond = _DMDPerSecond;
-    
+        emit SetDMDPerSecond(msg.sender, _DMDPerSecond);
     }
    
 }
