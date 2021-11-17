@@ -345,7 +345,6 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
 
     function setMasterChef(address _masterChef) public onlyOwner {
         //Masterchef contract address.
- 
         require(MasterChef != address(0), "!nonzero");
         MasterChef = _masterChef;
         emit SetMarterChef (msg.sender, _masterChef);
