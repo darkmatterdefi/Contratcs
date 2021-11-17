@@ -345,21 +345,15 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
 
     function setMasterChef(address _masterChef) public onlyOwner {
         //Masterchef contract address.
-<<<<<<< Updated upstream
-=======
+ 
         require(MasterChef != address(0), "!nonzero");
->>>>>>> Stashed changes
         MasterChef = _masterChef;
         emit SetMarterChef (msg.sender, _masterChef);
     }
 
     function setlockliquidity(address _lockliquidity) public onlyOwner {
         //address where liquidity will be locked.
-<<<<<<< Updated upstream
-
-=======
         require(lockliquidity != address(0), "!nonzero");
->>>>>>> Stashed changes
         lockliquidity = _lockliquidity;
         emit Setlockliquidity(msg.sender, _lockliquidity);
     }
@@ -452,7 +446,7 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
             "DarkMatter: _addMinter is the zero address"
         );
         return EnumerableSet.add(_minters, _addMinter);
-      
+        emit AddMinter (_addMinter);
          
     }
 
@@ -466,7 +460,7 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
             "DarkMatter: _removeMinter is the zero address"
         );
         return EnumerableSet.remove(_minters, _removeMinter);
-         
+        emit RemoveMinter (_removeMinter);
     }
 
     function getMinterLength() public view returns (uint256) {

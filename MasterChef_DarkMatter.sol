@@ -1845,7 +1845,7 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
     }
 
     // The DMD TOKEN!
-    DarkMatter public DMD;
+    DarkMatter public immutable DMD;
     // Dev address.
     address public dev_address;
     // DMD tokens created per block.
@@ -1862,10 +1862,12 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
     uint256 public totalAllocPoint = 0;
     //a maximum of 2 per second is set.
     uint256 public constant maxDMDPerSecond = 2e18;
-    // Timestamp startTime.
-    uint256 public immutable startTime;
-   
+    // Timestamp startTime. (the timestamp it started on mainnet) https://ftmscan.com/address/0x7c36c64811219cf9b797c5d9b264d9e7cdade7a4#readContract
+    uint256 public constant startTime = 1634049099;
+   // Max deposit fee 10% 
     uint16 public constant MaxdepositFeeBP = 1000;
+    // Deposited amount DarkMatter Token in MasterChef
+    uint256 public depositedDMD;
     
     // events 
     event Add(address indexed user, uint256 allocPoint, IERC20 indexed token, uint16 depositFeeBP, bool withUpdate);
@@ -1880,21 +1882,20 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
     constructor(
         DarkMatter _DMD,
         uint256 _DMDPerSecond,
-        uint256 _startTime,
         address _dev_Address,
         address _feeAddress
     ) public {
         DMD = _DMD;
-        dev_address = _dev_Address;
-        feeAddress = _feeAddress;
+        require(_dev_Address != address(0), "!nonzero");
+        require(_feeAddress != address(0), "!nonzero");
         DMDPerSecond = _DMDPerSecond;
-        startTime = _startTime;
-   
+        require (startTime != block.timestamp, "!can't be in the past.");
+        
         // staking pool
         poolInfo.push(PoolInfo({
             lpToken: _DMD,
             allocPoint: 1000,
-            lastRewardTime: _startTime,
+            lastRewardTime: startTime,
             accDMDPerShare: 0,
             depositFeeBP: 0
         }));
@@ -1910,6 +1911,12 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
     mapping(IERC20 => bool) public poolExistence;
     modifier nonDuplicated(IERC20 _lpToken) {
         require(poolExistence[_lpToken] == false, "nonDuplicated: duplicated");
+        _;
+    }
+    
+    modifier isPoolExist(uint256 _pid) {
+        PoolInfo storage pool = poolInfo[_pid];
+        require(poolExistence[pool.lpToken] == true, "isPoolExist: pool not exist");
         _;
     }
 
@@ -1935,7 +1942,7 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
     }
 
     // Update the given pool's DMD allocation point and deposit fee. Can only be called by the owner.
-    function set(uint256 _pid, uint256 _allocPoint, uint16 _depositFeeBP, bool _withUpdate) public onlyOwner {
+    function set(uint256 _pid, uint256 _allocPoint, uint16 _depositFeeBP, bool _withUpdate) public onlyOwner isPoolExist(_pid)  {
         require(_depositFeeBP <= MaxdepositFeeBP, "set: invalid deposit fee basis points"); // 1000 is 10% 
         if (_withUpdate) {
             massUpdatePools();
@@ -1983,6 +1990,10 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
             return;
         }
         uint256 lpSupply = pool.lpToken.balanceOf(address(this));
+        if (_pid ==0){
+            lpSupply = depositedDMD;
+        }
+        
         if (lpSupply == 0 || pool.allocPoint == 0) {
              pool.lastRewardTime = block.timestamp;
             return;
@@ -1992,8 +2003,9 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
         DMD.mint(dev_address, DMDReward.div(10));
         DMD.mint(address(this), DMDReward);
         pool.accDMDPerShare = pool.accDMDPerShare.add(DMDReward.mul(1e12).div(lpSupply));
-         pool.lastRewardTime = block.timestamp;
+        pool.lastRewardTime = block.timestamp;
     }
+    
 
     // Deposit LP tokens to MasterChef for DMD allocation.
     function deposit(uint256 _pid, uint256 _amount) public nonReentrant {
@@ -2012,7 +2024,7 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
             pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
             uint256 afterDeposit = pool.lpToken.balanceOf(address(this));
             _amount = afterDeposit.sub(beforeDeposit);
-            
+ 
             if (pool.depositFeeBP > 0) {
                 uint256 depositFee = _amount.mul(pool.depositFeeBP).div(10000);
                 pool.lpToken.safeTransfer(feeAddress, depositFee);
@@ -2059,10 +2071,13 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
         if(_amount > 0) {
             pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
             user.amount = user.amount.add(_amount);
+            depositedDMD = depositedDMD.add(_amount);
         }
         user.rewardDebt = user.amount.mul(pool.accDMDPerShare).div(1e12);
         emit Deposit(msg.sender, 0, _amount);
     }
+
+
 
     // Withdraw DMD tokens from STAKING.
     function leaveStaking(uint256 _amount) public nonReentrant  {
@@ -2077,6 +2092,7 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
         if(_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
+            depositedDMD = depositedDMD.add(_amount);
         }
         user.rewardDebt = user.amount.mul(pool.accDMDPerShare).div(1e12);
 
