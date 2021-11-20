@@ -1848,7 +1848,7 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
     //a maximum of 2 per second is set.
     uint256 public constant maxDMDPerSecond = 2e18;
     // Timestamp startTime. (the timestamp it started on mainnet) https://ftmscan.com/address/0x7c36c64811219cf9b797c5d9b264d9e7cdade7a4#readContract
-    uint256 public constant startTime = 1634049099;
+    uint256 public constant startTime = 1637449803; //  Saturday, November 20, 2021 23:10:03 PM UTC
    // Max deposit fee 10% 
     uint16 public constant MaxdepositFeeBP = 1000;
     // Deposited amount DarkMatter Token in MasterChef
@@ -1871,7 +1871,9 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
         address _feeAddress
     ) public {
         DMD = _DMD;
+        dev_address = _dev_Address;
         require(_dev_Address != address(0), "!nonzero");
+        feeAddress = _feeAddress;
         require(_feeAddress != address(0), "!nonzero");
         DMDPerSecond = _DMDPerSecond;
         require (startTime != block.timestamp, "!can't be in the past.");
@@ -1965,7 +1967,6 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
         for (uint256 pid = 0; pid < length; ++pid) {
             updatePool(pid);
         }
-        
     }
 
     // Update reward variables of the given pool to be up-to-date.
@@ -2077,7 +2078,7 @@ contract MasterChef_DarkMatter  is Ownable, ReentrancyGuard {
         if(_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.lpToken.safeTransfer(address(msg.sender), _amount);
-            depositedDMD = depositedDMD.add(_amount);
+            depositedDMD = depositedDMD.sub(_amount);
         }
         user.rewardDebt = user.amount.mul(pool.accDMDPerShare).div(1e12);
 
