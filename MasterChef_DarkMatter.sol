@@ -1594,6 +1594,8 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
     event SetDeflationController(address indexed _address);
     event SetMarterChef(address indexed _address);
     event Setlockliquidity(address indexed _address);
+    event AddMinter(address indexed AddMinter);
+    event RemoveMinter(address indexed RemoveMinter);
 
     using EnumerableSet for EnumerableSet.AddressSet;
     EnumerableSet.AddressSet private _minters;
@@ -1633,16 +1635,18 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
         return _burnTotal;
     }
 
-    function setMasterChef(address _address) public onlyOwner {
+    function setMasterChef(address _masterChef) public onlyOwner {
         //Masterchef contract address.
-
-        MasterChef = _address;
+        require(MasterChef != address(0), "!nonzero");
+        MasterChef = _masterChef;
+        emit SetMarterChef (msg.sender, _masterChef);
     }
 
-    function setlockliquidity(address _address) public onlyOwner {
+    function setlockliquidity(address _lockliquidity) public onlyOwner {
         //address where liquidity will be locked.
-
-        lockliquidity = _address;
+        require(lockliquidity != address(0), "!nonzero");
+        lockliquidity = _lockliquidity;
+        emit Setlockliquidity(msg.sender, _lockliquidity);
     }
 
     function transfer(address recipient, uint256 amount)
@@ -1671,10 +1675,11 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
         return true;
     }
 
-    function setDeflationController(address _address) external onlyOwner {
+    function setDeflationController(address _deflationController) external onlyOwner {
         // deflation controller contract address.
 
         deflationController = _address;
+        emit SetDeflationController (msg.sender, _deflationController);
     }
 
     /**
@@ -1728,6 +1733,7 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
             "DarkMatter: _addMinter is the zero address"
         );
         return EnumerableSet.add(_minters, _addMinter);
+        emit AddMinter (_addMinter);
     }
 
     function removeMinter(address _removeMinter)
@@ -1740,6 +1746,7 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
             "DarkMatter: _removeMinter is the zero address"
         );
         return EnumerableSet.remove(_minters, _removeMinter);
+        emit RemoveMinter (_removeMinter);
     }
 
     function getMinterLength() public view returns (uint256) {
@@ -1768,7 +1775,9 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
     // the owner of the token will be the Timelock and this function will not should be used at no time after the presale.
 
     function setPresale(address _presale) external onlyOwner {
+        require(presale != address(0), "!nonzero");
         presale = _presale;
+        emit SetPresale (msg.sender, _presale);
     }
 
     function unpause() external {

@@ -303,6 +303,8 @@ contract DarkMatter is DelegateERC20, Pausable, Ownable {
     event SetMarterChef(address indexed user, address indexed newAddress);
     event Setlockliquidity(address indexed user, address indexed newAddress);
     event SetPresale(address indexed user, address indexed newAddress);
+    event AddMinter(address indexed AddMinter);
+    event RemoveMinter(address indexed RemoveMinter);
      
 
     using EnumerableSet for EnumerableSet.AddressSet;
