@@ -19,7 +19,6 @@
 | [Members (MeDMD)](https://ftmscan.com/address/0x1d1aCbc92410296bA64EA3525c16A8e924FCa45A#code) |0x1d1aCbc92410296bA64EA3525c16A8e924FCa45A|
 | [Boxed Generals (BG)](https://ftmscan.com/address/0x10fa5F0dE00c788C11489308f67922022862b698#code) |0x10fa5F0dE00c788C11489308f67922022862b698|
 | [Generals DarkMatter(GEN)](https://ftmscan.com/address/0x2dF7E6537BefB7730e790143e2558945e9538fC2#code) |0x2dF7E6537BefB7730e790143e2558945e9538fC2|
-
 | [Vault DMD](https://ftmscan.com/address/0xe1930eA19a0a17AcbBADCaAF31F49c6b8Dd2c88c#code) |0xe1930eA19a0a17AcbBADCaAF31F49c6b8Dd2c88c|
 | [Controller Vault DMD](https://ftmscan.com/address/0xa78357d513369AbD64E8D3F9Ea35130fA828AC8d#code) |0xa78357d513369AbD64E8D3F9Ea35130fA828AC8d|
 | [Vault DMD-FTM](https://ftmscan.com/address/0xcdCFDDa5bF0Cb9C12A0BdC317EB52c9Aeab161d5#code) |0xcdCFDDa5bF0Cb9C12A0BdC317EB52c9Aeab161d5|
