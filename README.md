@@ -20,6 +20,28 @@
 | [Boxed Generals (BG)](https://ftmscan.com/address/0x10fa5F0dE00c788C11489308f67922022862b698#code) |0x10fa5F0dE00c788C11489308f67922022862b698|
 | [Generals DarkMatter(GEN)](https://ftmscan.com/address/0x2dF7E6537BefB7730e790143e2558945e9538fC2#code) |0x2dF7E6537BefB7730e790143e2558945e9538fC2|
 
+| [Vault DMD](https://ftmscan.com/address/0xe1930eA19a0a17AcbBADCaAF31F49c6b8Dd2c88c#code) |0xe1930eA19a0a17AcbBADCaAF31F49c6b8Dd2c88c|
+| [Controller Vault DMD](https://ftmscan.com/address/0xa78357d513369AbD64E8D3F9Ea35130fA828AC8d#code) |0xa78357d513369AbD64E8D3F9Ea35130fA828AC8d|
+| [Vault DMD-FTM](https://ftmscan.com/address/0xcdCFDDa5bF0Cb9C12A0BdC317EB52c9Aeab161d5#code) |0xcdCFDDa5bF0Cb9C12A0BdC317EB52c9Aeab161d5|
+| [Strat DMD-FTM](https://ftmscan.com/address/0xC6d1a60D96C1680041999AB0f2A1BDc3Ced9cC8c#code) |0xC6d1a60D96C1680041999AB0f2A1BDc3Ced9cC8c|
+| [Vault DMD-FUSDT](https://ftmscan.com/address/0x94D7F3266969Dc4566490ADd018FD2b3278ceafb#code) |0x94D7F3266969Dc4566490ADd018FD2b3278ceafb|
+| [Vault DMD-DAI](https://ftmscan.com/address/0x411b84A36525ff441c0a43dA3b519CBBc2387D45#code) |0x411b84A36525ff441c0a43dA3b519CBBc2387D45|
+| [Strat DMD-DAI](https://ftmscan.com/address/0x8e32c880086bb79ef796a5a0311eb4a3b60251fe#code) |0x8e32c880086bb79ef796a5a0311eb4a3b60251fe|
+| [Vault DMD-USDC](https://ftmscan.com/address/0x097C6341e8AcfD686B91616BbD99C02AFec5ef2B#code) |0x097C6341e8AcfD686B91616BbD99C02AFec5ef2B|
+| [Strat DMD-USDC](https://ftmscan.com/address/0xa027c566581ef2a361fba7d5bf72899df70e4ca4#code) |0xa027c566581ef2a361fba7d5bf72899df70e4ca4|
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
  
